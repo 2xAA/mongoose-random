@@ -52,7 +52,9 @@ function random(schema, options) {
 	 */
 	schema.statics.syncRandom = function (callback) {
 		var self = this;
-		var stream = self.find({}).stream({ transform: transform });
+        var query = {};
+        query[path] = {$exists: false};
+		var stream = self.find(query).stream({ transform: transform });
 		var result = {
 			attempted: 0,
 			updated: 0
