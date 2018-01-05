@@ -52,7 +52,9 @@ function random(schema, options) {
 	 */
 	schema.static('syncRandom', function (callback) {
 		var self = this;
-		var cursor = self.find({}).cursor({ transform: transform });
+		var query = {};
+		query[path] = { $exists: false };
+		var cursor = self.find(query).cursor({ transform: transform });
 		var result = {
 			attempted: 0,
 			updated: 0
