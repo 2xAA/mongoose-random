@@ -28,7 +28,7 @@ function random(schema, options) {
 	 * @param {Object}    [options]
 	 * @param {Function}  [callback]
 	 */
-	schema.statics.findRandom = function (conditions, fields, options, callback) {
+	schema.static('findRandom', function (conditions, fields, options, callback) {
 		var self = this;
 
 		if (!conditions || typeof conditions === 'function') {
@@ -44,23 +44,23 @@ function random(schema, options) {
 		var query = self.find.call(self, conditions, fields, options, callback);
 		query.__random = { path: path, query: conditions[path] };
 		return query;
-	};
+	});
 
 	/**
 	 * @method syncRandom
 	 * @param  callback
 	 */
-	schema.statics.syncRandom = function (callback) {
+	schema.static('syncRandom', function (callback) {
 		var self = this;
-		var stream = self.find({}).stream({ transform: transform });
+		var cursor = self.find({}).cursor({ transform: transform });
 		var result = {
 			attempted: 0,
 			updated: 0
 		};
 		var left = 0;
-		var streamEnd = false;
+		var cursorEnd = false;
 
-		stream.on('data', function (doc) {
+		cursor.on('data', function (doc) {
 			result.attempted += 1;
 			left += 1;
 			doc.save(function (err) {
@@ -71,17 +71,17 @@ function random(schema, options) {
 				}
 
 				left -= 1;
-				if (streamEnd && !left) {
+				if (cursorEnd && !left) {
 					return callback(null, result);
 				}
 			});
 		}).on('error', function (err) {
 			console.error(err.stack);
 		}).on('end', function () {
-			streamEnd = true;
+			cursorEnd = true;
 		});
-		return stream;
-	};
+		return cursor;
+	});
 
 	function transform(doc) {
 		var update = {
